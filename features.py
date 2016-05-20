@@ -38,8 +38,8 @@ class Extractor():
         self.net = caffe.Net(params['net_proto'], params['net'], caffe.TEST)
     
     def pool_feats(self,feat):        
-        f = np.max if self.pooling == 'max' else np.sum
-        return f(f(feat, axis=2), axis=1)
+        pool_func = np.max if self.pooling == 'max' else np.sum
+        return pool_func(pool_func(feat, axis=2), axis=1)
     
     def image2features(self,im):
         scores, _ = test_ops.im_detect(self.net, im, boxes=None)

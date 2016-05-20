@@ -35,7 +35,7 @@ class Ranker():
         return query_file
     
     def get_query_vectors(self, db_feats):
-        query_feats = np.zeros((len(self.query_names),self.dimension))
+        query_feats = np.zeros((len(self.query_names), self.dimension))
         
         for i,filename in enumerate(self.query_names):
             query_file       = self.query_info(filename)
@@ -53,7 +53,7 @@ class Ranker():
                 savefile.write(os.path.basename(rankings).split('.jpg')[0] + '\n')
             
             savefile.close()
-          
+
 
 def load_database(params):
     pca      = pickle.load(open('%s_%s.pkl' % (params['pca_model'], self.other_dataset), 'rb'))
