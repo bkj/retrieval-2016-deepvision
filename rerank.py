@@ -157,7 +157,6 @@ class Reranker():
         self.write_rankings(query,ranking,distances)
         
     def rerank_num_rerank(self,query_feats,ranking,query_name):
-        
         distances = []
         locations = []
         frames    = []
@@ -179,26 +178,16 @@ class Reranker():
             
             # we rank based on class scores 
             if self.use_class_scores:
-                
-                scores = feats[:,cls_ind]
-                
-                # position with highest score for that class
-                best_pos = np.argmax(scores)
-                
-                # array of boxes with higher score for that class
-                best_box_array = boxes[best_pos,:]
-                
-                # single box with max score for query class
-                best_box = best_box_array[4*cls_ind:4*(cls_ind + 1)]
-                
-                # the actual score
-                distances.append(np.max(scores))
-                locations.append(best_box)
                 class_ids.append(cls_ind)
                 
+                scores         = feats[:,cls_ind]
+                distances.append(np.max(scores))
+                
+                best_pos       = np.argmax(scores)
+                best_box_array = boxes[best_pos,:]
+                best_box       = best_box_array[4 * cls_ind:4 * (cls_ind + 1)]
+                locations.append(best_box)
             else:
-                
-                
                 if self.pooling is 'sum':
                     # pca transform
                     feats = np.sum(np.sum(feats,axis=2),axis=2)
@@ -231,12 +220,11 @@ class Reranker():
             
                 # Select the best box for the best class
                 best_box = best_box_array[4*cls_ind:4*(cls_ind + 1)]
-                            
                 locations.append(best_box)
                 
-        return distances,locations, frames, class_ids
+        return distances, locations, frames, class_ids
           
-    def rerank(self, num_queries=1):
+    def rerank_all(self, num_queries=1):
         for i,query in enumerate(self.query_names):
             print "Reranking for query", i, "out of", len(iter_), '...'
             self.rerank_one_query(query,num_queries)
@@ -255,4 +243,4 @@ class Reranker():
         savefile.close()
         
 if __name__== '__main__':
-    Reranker(params).rerank()
+    Reranker(params).rerank_all()
