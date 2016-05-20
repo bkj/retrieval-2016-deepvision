@@ -36,14 +36,13 @@ def learn_transform(params, feats):
 class Extractor():
 
     def __init__(self,params):
-
+        
         self.dimension = params['dimension']
         self.dataset   = params['dataset']
         self.pooling   = params['pooling']
-
+        
         self.database_list = open(params['frame_list'],'r').read().splitlines()
-
-        # Parameters needed
+        
         self.layer         = params['layer']
         self.save_db_feats = params['database_feats']
         
@@ -53,29 +52,25 @@ class Extractor():
     def extract_feat_image(self,image):
         im = cv2.imread(image)
         scores, boxes = test_ops.im_detect(self.net, im, boxes=None)
-        return self.net.blobs[self.layer].data
+        return self.net.blobs[self.layer].data.squeeze()
 
     def pool_feats(self,feat):        
         f = np.max if self.pooling == 'max' else np.sum
         return f(f(feat, axis=2), axis=1)
         
     def save_feats_to_disk(self):
-        xfeats  = np.zeros((len(self.database_list),self.dimension))
-        counter = 0
+        xfeats  = np.zeros((len(self.database_list), self.dimension))
+        
         t0 = time.time()
-        for frame in self.database_list:
-            counter +=1
-            
-            # Extract raw feature from cnn
-            feat = self.extract_feat_image(frame).squeeze()
-            print feat
-            xfeats[counter-1,:] = self.pool_feats(feat)
+        for i,frame in enumerate(self.database_list):
+            feat = self.extract_feat_image(frame)
+            feat = self.pool_feats(feat)
+            xfeats[i,:] = feat
             
             if not counter % 5:
                 print counter, '/', len(self.database_list), time.time() - t0
         
-        
-        pickle.dump(xfeats, open(self.save_db_feats,'wb'))
+        pickle.dump(xfeats, open(self.save_db_feats, 'wb'))
         
 
 if __name__ == "__main__":
