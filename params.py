@@ -5,7 +5,7 @@ def get_params():
     params = {}
     
     # Parameters
-    params['dataset'] = 'paris'
+    params['dataset'] = 'oxford'
     
     params['stage']               = 'rerank' # if 'rerank', display will include detections. if 'rerank2nd', reranking will be performed with QE top N locations
     params['use_regressed_boxes'] = False
@@ -15,18 +15,18 @@ def get_params():
     params['pooling']             = 'max'
     
     params['fast_rcnn_path'] = '../py-faster-rcnn/'
-    params['net'] = 'data/models/faster_rcnn_models/ZF_faster_rcnn_final.caffemodel'
-    params['net_proto'] ='data/models/zf-test.prototxt'
+    params['net']            = 'data/models/faster_rcnn_models/ZF_faster_rcnn_final.caffemodel'
+    params['net_proto']      = 'data/models/zf-test.prototxt'
             
     params['layer'] = 'conv5' # VGG : conv5_3; ZF: conv5;
     params['dimension'] = 256 # number of filters in the used layer
       
-    params['K'] = 100000 # Number of elements to consider for mAP (high number means all elements are evaluated)
+    params['K']          = 100000 # Number of elements to consider for mAP (high number means all elements are evaluated)
     params['num_rerank'] = 10 # Top elements to consider for reranking
-    params['size_box'] = 15 # for display 
-    params['N_QE'] = 5 # default: 5; number of elements for query expansion
-    params['N_display'] = 10 # default: 100;  top N ranking to display
-    params['figsize'] = (80,40)
+    params['size_box']   = 15 # for display 
+    params['N_QE']       = 5 # default: 5; number of elements for query expansion
+    params['N_display']  = 10 # default: 100;  top N ranking to display
+    params['figsize']    = (80,40)
     
     if params['dataset'] is 'oxford':
         params['query_names']       = ["all_souls", "ashmolean", "balliol","bodleian", "christ_church", "cornmarket","hertford","keble","magdalen","pitt_rivers","radcliffe_camera"]
@@ -46,30 +46,34 @@ def get_params():
     params['figures_path']   = 'data/figures/'
     params['reranking_path'] = 'data/reranking/'
     
-    params['paris_corrupt_list'] = ['paris_louvre_000136.jpg',
-                                    'paris_louvre_000146.jpg',
-                                    'paris_moulinrouge_000422.jpg', 
-                                    'paris_museedorsay_001059.jpg',
-                                    'paris_notredame_000188.jpg',
-                                    'paris_pantheon_000284.jpg',
-                                    'paris_pantheon_000960.jpg',
-                                    'paris_pantheon_000974.jpg',
-                                    'paris_pompidou_000195.jpg',
-                                    'paris_pompidou_000196.jpg',
-                                    'paris_pompidou_000201.jpg',
-                                    'paris_pompidou_000467.jpg',
-                                    'paris_pompidou_000640.jpg',
-                                    'paris_sacrecoeur_000299.jpg',
-                                    'paris_sacrecoeur_000330.jpg',
-                                    'paris_sacrecoeur_000353.jpg',
-                                    'paris_triomphe_000662.jpg',
-                                    'paris_triomphe_000833.jpg',
-                                    'paris_triomphe_000863.jpg',
-                                    'paris_triomphe_000867.jpg']
-    
+    params['paris_corrupt_list'] = [
+        'paris_louvre_000136.jpg',
+        'paris_louvre_000146.jpg',
+        'paris_moulinrouge_000422.jpg', 
+        'paris_museedorsay_001059.jpg',
+        'paris_notredame_000188.jpg',
+        'paris_pantheon_000284.jpg',
+        'paris_pantheon_000960.jpg',
+        'paris_pantheon_000974.jpg',
+        'paris_pompidou_000195.jpg',
+        'paris_pompidou_000196.jpg',
+        'paris_pompidou_000201.jpg',
+        'paris_pompidou_000467.jpg',
+        'paris_pompidou_000640.jpg',
+        'paris_sacrecoeur_000299.jpg',
+        'paris_sacrecoeur_000330.jpg',
+        'paris_sacrecoeur_000353.jpg',
+        'paris_triomphe_000662.jpg',
+        'paris_triomphe_000833.jpg',
+        'paris_triomphe_000863.jpg',
+        'paris_triomphe_000867.jpg'
+    ]
     
     list_of_dirs = ['data/imagelists','data/rankings/','data/features','data/rankings','data/rankings/oxford','data/rankings/paris','data/reranking','data/pca','data/figures']
-    _ = [os.makedirs(_dir) for _dir in list_of_dirs if not os.path.isdir(_dir)]            
+    
+    # Make directories
+    _ = [os.makedirs(_dir) for _dir in list_of_dirs if not os.path.isdir(_dir)]
+    
     return params
 
 

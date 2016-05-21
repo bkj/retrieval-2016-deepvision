@@ -49,16 +49,15 @@ class Reranker():
         self.rankings_dir        = params['rankings_dir']
         self.queries             = params['query_names']
         
-        self.database_list = open(params['frame_list'],'r').read().splitlines()      
-        self.query_names   = open(params['query_list'],'r').read().splitlines()
+        self.database_list = open(params['frame_list'],'r').read().splitlines()
         
         self.net = caffe.Net(params['net_proto'], params['net'], caffe.TEST)
         
         if self.pooling == 'sum':
             self.pca = pickle.load(open('%s_%s.pkl' % (params['pca_model'], self.other_dataset), 'rb'))
-     
+    
     def read_ranking(self,query):
-        inpath = os.path.join(self.rankings_dir,os.path.basename(query.split('_query')[0]) +'.txt')
+        inpath = os.path.join(self.rankings_dir, os.path.basename(query.split('_query')[0]) +'.txt')
         return open(inpath,'r').read().splitlines()
     
     def query_info(self,filename):
@@ -77,24 +76,23 @@ class Reranker():
         pool_func = np.max if self.pooling == 'max' else np.sum
         return pool_func(pool_func(feat, axis=1), axis=1)
 
-    def get_query_local_feat(self, query, box=None):
-        im   = cv2.imread(query)
-        _    = test_ops.im_detect(self.net, im, boxes = None)
+    def image2localfeatures(self, im, box=None):
+        _    = test_ops.im_detect(self.net, im, boxes=None)
         feat = self.net.blobs[self.layer].data.squeeze()
         
         height, width = im.shape
         mult_h = float(np.shape(feat)[1]) / height
         mult_w = float(np.shape(feat)[2]) / width
         
-        if box is None:
+        if box:
+            xmin, ymin, xmax, ymax = box[0:4]
+            bbx = [int(math.floor(xmin*mult_w)),int(math.floor(ymin*mult_h)),int(math.ceil(xmax*mult_w)),int(math.ceil(ymax*mult_h))]        
+        else:
             query, bbx = self.query_info(query)
             bbx[0] *= mult_w
             bbx[2] *= mult_w
             bbx[1] *= mult_h
             bbx[3] *= mult_h
-        else:
-            xmin, ymin, xmax, ymax = box[0:4]
-            bbx = [int(math.floor(xmin*mult_w)),int(math.floor(ymin*mult_h)),int(math.ceil(xmax*mult_w)),int(math.ceil(ymax*mult_h))]
         
         local_feat = feat[:,bbx[1]:bbx[3],bbx[0]:bbx[2]]
         return self.pool_feats(local_feat)
@@ -102,9 +100,10 @@ class Reranker():
     def rerank_one_query(self,query):
         ranking = self.read_ranking(query)
         
-        query_name = os.path.basename(query).rsplit('_',2)[0]
+        query_name  = os.path.basename(query).rsplit('_',2)[0]
         
-        query_feats = self.get_query_local_feat(query)
+        im = cv2.imread(query)
+        query_feats = self.image2localfeatures(im)
         query_feats = query_feats.reshape(-1, 1)
         
         # if self.stage is 'rerank2nd':
@@ -120,7 +119,8 @@ class Reranker():
         #     locations_sorted = np.array(locations)[np.argsort(distances)]
             
         #     for i_qe in range(self.N_QE):
-        #         query_feats += self.get_query_local_feat(frames_sorted[i_qe],locations_sorted[i_qe])
+        #         im_qe = cv2.imread(frames_sorted[i_qe])
+        #         query_feats += self.image2localfeatures(im_qe, box=locations_sorted[i_qe])
             
         #     query_feats/=(self.N_QE+1)
         
@@ -209,13 +209,7 @@ class Reranker():
                 locations.append(best_box)
                 
         return distances, locations, frames, class_ids
-          
-    def rerank_all(self):
-        for i,query in enumerate(self.query_names):
-            print "Reranking for query", i, "out of", len(iter_), '...'
-            query, ranking, distances = self.rerank_one_query(query)
-            self.write_rankings(query, ranking, distances)
-                        
+        
     def write_rankings(self, query, ranking, distances):
         argdist = np.argsort(distances)
         if self.use_class_scores:
@@ -223,11 +217,22 @@ class Reranker():
         
         ranking[0:self.num_rerank] = np.array(ranking[0:self.num_rerank])[argdist]
         
-        savefile = open(os.path.join(self.rankings_dir,os.path.basename(query.split('_query')[0]) +'.txt'),'w')
+        savefile = open(os.path.join(self.rankings_dir, os.path.basename(query.split('_query')[0]) +'.txt'),'w')
         for rank in ranking:
             savefile.write(os.path.basename(rank).split('.jpg')[0] + '\n')
         
         savefile.close()
         
 if __name__== '__main__':
-    Reranker(params).rerank_all()
+    query_list = open(params['query_list'],'r').read().splitlines()
+    
+    r = Reranker(params)
+    
+    for i, q in enumerate(query_list):
+        res = r.rerank_one_query(q)
+        r.write_rankings(*res)
+
+
+
+
+

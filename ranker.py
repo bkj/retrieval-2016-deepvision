@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import random
 import pickle
@@ -10,12 +11,9 @@ from params import get_params
 class Ranker():
     def __init__(self,params):
         
-        self.dataset       = params['dataset']
-        self.other_dataset = 'paris' if self.dataset == 'oxford' else 'oxford'
-        
+        self.dataset         = params['dataset']
         self.database_images = params['database_images']
         self.dimension       = params['dimension']
-        self.pooling         = params['pooling']
         self.N_QE            = params['N_QE']
         self.stage           = params['stage']
         self.rankings_dir    = params['rankings_dir']
@@ -50,16 +48,19 @@ class Ranker():
             rankings = self.database_list[np.argsort(scores)]
             savefile = open(os.path.join(self.rankings_dir, os.path.basename(query.split('_query')[0]) +'.txt'),'w')    
             for ranking in rankings:
-                savefile.write(os.path.basename(rankings).split('.jpg')[0] + '\n')
+                savefile.write(os.path.basename(ranking).split('.jpg')[0] + '\n')
             
             savefile.close()
 
 
 def load_database(params):
-    pca      = pickle.load(open('%s_%s.pkl' % (params['pca_model'], self.other_dataset), 'rb'))
+    other_dataset = 'paris' if params['dataset'] == 'oxford' else 'oxford'
+    pca      = pickle.load(open('%s_%s.pkl' % (params['pca_model'], other_dataset), 'rb'))
+    
     db_feats = pickle.load(open(params['database_feats'], 'rb'))
+    
     normalize(db_feats)
-    if self.pooling is 'sum':
+    if params['pooling'] is 'sum':
         db_feats = pca.transform(db_feats)
         normalize(db_feats)
     
@@ -68,9 +69,17 @@ def load_database(params):
 
 if __name__ == "__main__":
     params = get_params()
-
-    db_feats    = load_database(params)
-    query_feats = Ranker(params).get_query_vectors(db_feats)
+    ranker = Ranker(params)
     
-    distances   = pairwise_distances(query_feats, db_feats, params['distance'], n_jobs=-1)
+    print >> sys.stderr, 'ranker :: load_database'
+    db_feats = load_database(params)
+    
+    print >> sys.stderr, 'ranker :: get_query_vectors'
+    query_feats = ranker.get_query_vectors(db_feats)
+    
+    print >> sys.stderr, 'ranker :: pairwise_distances'
+    distances = pairwise_distances(query_feats, db_feats, params['distance'], n_jobs=-1)
+    
+    print >> sys.stderr, 'ranker :: write_rankings'
     ranker.write_rankings(distances)
+    
