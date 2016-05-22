@@ -8,9 +8,11 @@ from params import get_params
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 
+# --
+# Setup
+
 params = get_params()
 
-# Add Faster R-CNN module to pythonpath
 sys.path.insert(0, os.path.join(params['fast_rcnn_path'],'caffe-fast-rcnn', 'python'))
 sys.path.insert(0, os.path.join(params['fast_rcnn_path'],'lib'))
 
@@ -25,15 +27,15 @@ if params['gpu']:
 else:
     caffe.set_mode_cpu()
 
+# --
+
 class Extractor():
     
     def __init__(self, params):    
-        self.dimension      = params['dimension']
-        self.dataset        = params['dataset']
-        self.pooling        = params['pooling']
-        self.layer          = params['layer']
-        
-        self.database_list = open(params['frame_list'],'r').read().splitlines()
+        self.dimension = params['dimension']
+        self.dataset   = params['dataset']
+        self.pooling   = params['pooling']
+        self.layer     = params['layer']
         
         self.net = caffe.Net(params['net_proto'], params['net'], caffe.TEST)
     
@@ -46,22 +48,22 @@ class Extractor():
         feats = self.net.blobs[self.layer].data.squeeze()
         return self.pool_feats(feats)
     
-    def save_feats_to_disk(self, PRINT_INTERVAL=5):
-        pooled_feats = np.zeros((len(self.database_list), self.dimension))
-        
+    def dblist2pfeatures(self, dblist, PRINT_INTERVAL=5):        
         t0 = time.time()
-        for i,frame in enumerate(self.database_list):
+        pooled_feats = np.zeros((len(dblist), self.dimension))
+        for i,frame in enumerate(dblist):
             pooled_feats[i,:] = self.image2features(cv2.imread(frame))
             
-            if not counter % PRINT_INTERVAL:
-                print counter, '/', len(self.database_list), time.time() - t0
+            if not i % PRINT_INTERVAL:
+                print '%d/%d in %f seconds' % (i, len(dblist), time.time() - t0)
         
         return pooled_feats
-        
+
 
 if __name__ == "__main__":    
     # Compute and save pooled_feats
-    pooled_feats = Extractor(params).save_feats_to_disk()
+    dblist = open(params['frame_list'],'r').read().splitlines()
+    pooled_feats = Extractor(params).dblist2pfeatures(dblist)
     pickle.dump(pooled_feats, open(params['database_feats'], 'wb'))
     
     # Learn whitening transformation from pooled_feats

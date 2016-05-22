@@ -5,7 +5,7 @@ def get_params():
     params = {}
     
     # Parameters
-    params['dataset'] = 'oxford'
+    params['dataset'] = 'paris'
     
     params['stage']               = 'rerank' # if 'rerank', display will include detections. if 'rerank2nd', reranking will be performed with QE top N locations
     params['use_regressed_boxes'] = False
@@ -14,19 +14,19 @@ def get_params():
     params['distance']            = 'cosine'
     params['pooling']             = 'max'
     
-    params['fast_rcnn_path'] = '../faster-rcnn/'
-    params['net']            = 'data/models/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel'
-    params['net_proto']      = 'data/models/test.prototxt'
+    params['fast_rcnn_path'] = '../py-faster-rcnn/'
+    params['net'] = 'data/models/faster_rcnn_models/ZF_faster_rcnn_final.caffemodel'
+    params['net_proto'] ='data/models/zf-test.prototxt'
             
-    params['layer']     = 'conv5_3'
-    params['dimension'] = 512 # number of filters in the used layer
+    params['layer'] = 'conv5' # VGG : conv5_3; ZF: conv5;
+    params['dimension'] = 256 # number of filters in the used layer
       
-    params['K']          = 100000 # Number of elements to consider for mAP (high number means all elements are evaluated)
-    params['num_rerank'] = 100 # Top elements to consider for reranking
-    params['size_box']   = 15 # for display 
-    params['N_QE']       = 5 # number of elements for query expansion
-    params['N_display']  = 10 # top N ranking to display
-    params['figsize']    = (80,40)
+    params['K'] = 100000 # Number of elements to consider for mAP (high number means all elements are evaluated)
+    params['num_rerank'] = 10 # Top elements to consider for reranking
+    params['size_box'] = 15 # for display 
+    params['N_QE'] = 5 # default: 5; number of elements for query expansion
+    params['N_display'] = 10 # default: 100;  top N ranking to display
+    params['figsize'] = (80,40)
     
     if params['dataset'] is 'oxford':
         params['query_names']       = ["all_souls", "ashmolean", "balliol","bodleian", "christ_church", "cornmarket","hertford","keble","magdalen","pitt_rivers","radcliffe_camera"]
