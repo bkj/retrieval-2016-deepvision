@@ -46,11 +46,12 @@ class Ranker():
     
     def write_rankings(self, distances):
         for i,query in enumerate(self.query_names):
-            scores   = distances[i,:]
-            rankings = self.database_list[np.argsort(scores)]
+            distances_  = distances[i,:]
+            ranking     = self.database_list[np.argsort(distances_)]
+            
             savefile = open(os.path.join(self.rankings_dir, os.path.basename(query.split('_query')[0]) +'.txt'),'w')    
-            for ranking in rankings:
-                savefile.write(os.path.basename(rankings).split('.jpg')[0] + '\n')
+            for rank in ranking:
+                savefile.write(os.path.basename(rank).split('.jpg')[0] + '\n')
             
             savefile.close()
 

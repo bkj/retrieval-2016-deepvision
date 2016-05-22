@@ -42,7 +42,7 @@ class Extractor():
         return pool_func(pool_func(feat, axis=2), axis=1)
     
     def image2features(self,im):
-        scores, _ = test_ops.im_detect(self.net, im, boxes=None)
+        _     = test_ops.im_detect(self.net, im, boxes=None)
         feats = self.net.blobs[self.layer].data.squeeze()
         return self.pool_feats(feats)
     
