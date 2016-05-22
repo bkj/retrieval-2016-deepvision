@@ -97,12 +97,8 @@ class Reranker():
         local_feat = feat[:,bbx[1]:bbx[3],bbx[0]:bbx[2]]
         return self.pool_feats(local_feat)
     
-    def rerank_one_query(self,query):
-        ranking = self.read_ranking(query)
-        
-        query_name  = os.path.basename(query).rsplit('_',2)[0]
-        
-        im = cv2.imread(query)
+    def query2localfeatures(self, query, ranking, query_name):
+        im          = cv2.imread(query)
         query_feats = self.image2localfeatures(im)
         query_feats = query_feats.reshape(-1, 1)
         
@@ -131,6 +127,9 @@ class Reranker():
             query_feats = self.pca.transform(query_feats)
             normalize(query_feats)
         
+        return query_feats
+    
+    def rerank_one_query(self, query_feats, ranking, query_name):
         distances, locations, frames, class_ids = self.rerank_num_rerank(query_feats, ranking, query_name)
         
         outpath = os.path.join(self.reranking_path,os.path.basename(query.split('_query')[0]) + '.pkl')
@@ -140,14 +139,14 @@ class Reranker():
             pickle.dump(frames,f)
             pickle.dump(class_ids,f)
         
-        return query, ranking, distances
+        return distances
     
     def image2features(self, im):
         scores, boxes = test_ops.im_detect(self.net, im, boxes=None, REG_BOXES=self.use_regressed_boxes)
         feat          = self.net.blobs[self.layer_roi].data
         return feat, boxes, scores
     
-    def rerank_num_rerank(self,query_feats,ranking,query_name):
+    def rerank_num_rerank(self, query_feats, ranking, query_name):
         distances = []
         locations = []
         frames    = []
@@ -209,28 +208,35 @@ class Reranker():
                 locations.append(best_box)
                 
         return distances, locations, frames, class_ids
-        
-    def write_rankings(self, query, ranking, distances):
-        argdist = np.argsort(distances)
-        if self.use_class_scores:
-            argdist = argdist[::-1]
-        
-        ranking[0:self.num_rerank] = np.array(ranking[0:self.num_rerank])[argdist]
-        
+    
+    def write_rankings(self, query, ranking):        
         savefile = open(os.path.join(self.rankings_dir, os.path.basename(query.split('_query')[0]) +'.txt'),'w')
         for rank in ranking:
             savefile.write(os.path.basename(rank).split('.jpg')[0] + '\n')
         
         savefile.close()
-        
+    
 if __name__== '__main__':
     query_list = open(params['query_list'],'r').read().splitlines()
     
     r = Reranker(params)
     
-    for i, q in enumerate(query_list):
-        res = r.rerank_one_query(q)
-        r.write_rankings(*res)
+    for i, query in enumerate(query_list):
+        query_feats = r.query2localfeatures(query)
+        ranking     = self.read_ranking(query)
+        query_name  = os.path.basename(query).rsplit('_',2)[0]
+        
+        # Compute distances
+        distances = r.rerank_one_query(query_feats, ranking, query_name)
+        
+        # Rerank top n 
+        argdist = np.argsort(distances)
+        if params['use_class_scores']:
+            argdist = argdist[::-1]
+        
+        ranking[:params['num_rerank']] = np.array(ranking[:params['num_rerank']])[argdist]
+        
+        r.write_rankings(query, ranking)
 
 
 
