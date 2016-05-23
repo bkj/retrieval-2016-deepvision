@@ -39,7 +39,7 @@ class Extractor():
         
         self.net = caffe.Net(params['net_proto'], params['net'], caffe.TEST)
     
-    def pool_feats(self,feat):        
+    def pool_feats(self, feat):        
         pool_func = np.max if self.pooling == 'max' else np.sum
         return pool_func(pool_func(feat, axis=2), axis=1)
     
@@ -70,15 +70,17 @@ class Extractor():
 
 
 if __name__ == "__main__":    
-    # Compute and save all_feats
+    # Load list of files
     dblist = open(params['frame_list'],'r').read().splitlines()
+    
+    # Compute all features
     all_features = Extractor(params).dblist2features(dblist)
-    pickle.dump(all_features, open(params['database_feats_wbox'], 'wb'))
-    
+        
+    # Learn whitening transformation from embeddings
     all_embs = np.vstack([af['feats'] for af in all_features])
-    
-    # Learn whitening transformation from all_feats
     normalize(all_embs)
     pca = PCA(params['dimension'], whiten=True)
     pca.fit(all_embs)
+    
+    pickle.dump(all_features, open(params['database_feats_wbox'], 'wb'))
     pickle.dump(pca, open('%s_%s.pkl' % (params['pca_model'], params['dataset']), 'wb'))
