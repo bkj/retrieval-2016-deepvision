@@ -164,13 +164,14 @@ class Reranker():
             
             frames.append(frame_to_read)
             # Get features of current element
-            feats, boxes, scores = self.image2features(cv2.imread(image))
+            im = cv2.imread(image)
+            feats, boxes, scores = self.image2features(im)
             
             # we rank based on class scores 
             if self.use_class_scores:
                 class_ids.append(cls_ind)
                 
-                scores         = feats[:,cls_ind]
+                scores = feats[:,cls_ind]
                 distances.append(np.max(scores))
                 
                 best_pos       = np.argmax(scores)
