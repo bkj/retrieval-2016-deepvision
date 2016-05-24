@@ -41,7 +41,10 @@ def get_params():
     params['query_list']     = 'data/imagelists/query' +'_' +params['dataset'] +  '.txt' # A txt file  
     params['frame_list']     = 'data/imagelists/' + params['dataset'] + '.txt' # A txt file - trecvid
     params['rankings_dir']   = 'data/rankings/'+ params['dataset']
+
     params['database_feats'] = 'data/features/' + params['dataset'] + '_' + params['layer'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
+    params['database_feats_wbox'] = 'data/features_wbox/' + params['dataset'] + '_' + params['layer'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
+
     params['pca_model']      = 'data/pca/' + params['layer'] + '_' + params['pooling'] 
     params['figures_path']   = 'data/figures/'
     params['reranking_path'] = 'data/reranking/'
@@ -69,7 +72,11 @@ def get_params():
         'paris_triomphe_000867.jpg'
     ]
     
-    list_of_dirs = ['data/imagelists','data/rankings/','data/features','data/rankings','data/rankings/oxford','data/rankings/paris','data/reranking','data/pca','data/figures']
+    list_of_dirs = [
+        'data/imagelists','data/rankings/','data/features', 'data/features_wbox',
+        'data/rankings','data/rankings/oxford','data/rankings/paris',
+        'data/reranking','data/pca','data/figures'
+    ]
     
     # Make directories
     _ = [os.makedirs(_dir) for _dir in list_of_dirs if not os.path.isdir(_dir)]

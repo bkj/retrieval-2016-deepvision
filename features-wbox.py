@@ -4,6 +4,7 @@ import cv2
 import time
 import pickle
 import numpy as np
+import argparse
 from params import get_params
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
@@ -57,24 +58,29 @@ class Extractor():
         
         out = []
         
-        for fname in dblist:
+        for i,fname in enumerate(dblist):
             
             out_ = self.image2features(cv2.imread(fname))
-            out_.extend({'fname' : fname})
+            out_.update({'fname' : fname})
             out.append(out_)
             
             if not i % PRINT_INTERVAL:
-                print '%d/%d in %f seconds' % (len(out), len(dblist), time.time() - t0)
+                print '%d/%d in %f seconds' % (i, len(dblist), time.time() - t0)
         
         return out
 
 
-if __name__ == "__main__":    
+# def parse_args():
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--sparse', dest = 'sparse', action="store_true")
+#     args = parser.parse_args()
+
+if __name__ == "__main__":
     # Load list of files
-    dblist = open(params['frame_list'],'r').read().splitlines()
+    dblist = open(params['frame_list'], 'r').read().splitlines()
     
     # Compute all features
-    all_features = Extractor(params).dblist2features(dblist)
+    all_features = Extractor(params).dblist2features(dblist[0:50])
         
     # Learn whitening transformation from embeddings
     all_embs = np.vstack([af['feats'] for af in all_features])
