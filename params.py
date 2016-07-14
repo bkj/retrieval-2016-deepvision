@@ -18,9 +18,10 @@ def get_params():
     params['net']            = 'data/models/faster_rcnn_models/ZF_faster_rcnn_final.caffemodel'
     params['net_proto']      = 'data/models/zf-test.prototxt'
             
-    params['layer'] = 'conv5' # VGG : conv5_3; ZF: conv5;
-    params['dimension'] = 256 # number of filters in the used layer
-      
+    params['layer_dense'] = 'conv5' # VGG : conv5_3; ZF: conv5;
+    params['layer_roi']   = 'roi_pool_conv5' # VGG: pool5, ZF: roi_pool_conv5
+    params['dimension']   = 256 # number of filters in the used layer
+    
     params['K']          = 100000 # Number of elements to consider for mAP (high number means all elements are evaluated)
     params['num_rerank'] = 10 # Top elements to consider for reranking
     params['size_box']   = 15 # for display 
@@ -42,10 +43,10 @@ def get_params():
     params['frame_list']     = 'data/imagelists/' + params['dataset'] + '.txt' # A txt file - trecvid
     params['rankings_dir']   = 'data/rankings/'+ params['dataset']
 
-    params['database_feats'] = 'data/features/' + params['dataset'] + '_' + params['layer'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
-    params['database_feats_wbox'] = 'data/features_wbox/' + params['dataset'] + '_' + params['layer'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
+    params['database_feats'] = 'data/features/' + params['dataset'] + '_' + params['layer_dense'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
+    params['database_feats_wbox'] = 'data/features_wbox/' + params['dataset'] + '_' + params['layer_dense'] + '_' + params['pooling']+ '.pkl' # This is a single pickle file
 
-    params['pca_model']      = 'data/pca/' + params['layer'] + '_' + params['pooling'] 
+    params['pca_model']      = 'data/pca/' + params['layer_dense'] + '_' + params['pooling'] 
     params['figures_path']   = 'data/figures/'
     params['reranking_path'] = 'data/reranking/'
     

@@ -76,9 +76,8 @@ class Visualization():
     def get_query_im(self,query):
             
         query,bbx = self.query_info(query)
-        im = cv2.imread(query)
-            
         
+        im = cv2.imread(query)        
         im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
         cv2.rectangle(im, (int(bbx[0]), int(bbx[1])), (int(bbx[2]), int(bbx[3])), (255,0,0),self.size_box)
         
@@ -119,7 +118,7 @@ class Visualization():
         ranking = self.read_ranking(query)
 
         junk = np.loadtxt(os.path.join(self.ground_truth,os.path.basename(query).split('_query.txt')[0] + '_junk.txt'),dtype="str")
-        ok = np.loadtxt(os.path.join(self.ground_truth,os.path.basename(query).split('_query.txt')[0] + '_ok.txt'),dtype = "str")
+        ok   = np.loadtxt(os.path.join(self.ground_truth,os.path.basename(query).split('_query.txt')[0] + '_ok.txt'),dtype = "str")
         good = np.loadtxt(os.path.join(self.ground_truth,os.path.basename(query).split('_query.txt')[0] + '_good.txt'),dtype = "str")
         
         if self.stage is 'rerank':

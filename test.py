@@ -113,7 +113,7 @@ def _get_blobs(im, rois):
         blobs['rois'] = _get_rois_blob(rois, im_scale_factors)
     return blobs, im_scale_factors
 
-def im_detect(net, im, boxes=None,REG_BOXES=False):
+def im_detect(net, im, boxes=None, REG_BOXES=False):
     """Detect object classes in an image given object proposals.
 
     Arguments:
@@ -128,7 +128,7 @@ def im_detect(net, im, boxes=None,REG_BOXES=False):
     """
 
     CLS_SCORE = 'cls_score'
-    CLS_PROB = 'cls_prob'
+    CLS_PROB  = 'cls_prob'
     BBOX_PRED = 'bbox_pred'
     blobs, im_scales = _get_blobs(im, boxes)
     
@@ -137,10 +137,9 @@ def im_detect(net, im, boxes=None,REG_BOXES=False):
     # Here, we identify duplicate feature ROIs, so we only compute features
     # on the unique subset.
     if cfg.DEDUP_BOXES > 0 and not cfg.TEST.HAS_RPN:
-        v = np.array([1, 1e3, 1e6, 1e9, 1e12])
+        v     = np.array([1, 1e3, 1e6, 1e9, 1e12])
         hashes = np.round(blobs['rois'] * cfg.DEDUP_BOXES).dot(v)
-        _, index, inv_index = np.unique(hashes, return_index=True,
-                                        return_inverse=True)
+        _, index, inv_index = np.unique(hashes, return_index=True, return_inverse=True)
         blobs['rois'] = blobs['rois'][index, :]
         boxes = boxes[index, :]
 

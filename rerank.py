@@ -75,7 +75,7 @@ class Reranker():
     def pool_feats(self, feat):        
         pool_func = np.max if self.pooling == 'max' else np.sum
         return pool_func(pool_func(feat, axis=1), axis=1)
-
+    
     def image2localfeatures(self, im, box=None):
         _    = test_ops.im_detect(self.net, im, boxes=None)
         feat = self.net.blobs[self.layer].data.squeeze()
@@ -203,7 +203,7 @@ class Reranker():
                 # Class ID with max score . 
                 cls_ind = np.argmax(scores[idx,:]) 
                 class_ids.append(cls_ind+1)
-            
+                
                 # Select the best box for the best class
                 best_box = best_box_array[4*cls_ind:4*(cls_ind + 1)]
                 locations.append(best_box)
